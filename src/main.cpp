@@ -25,4 +25,7 @@ int main() {
         // Allow other tasks to run
         this_thread::sleep_for(10);
     }
+
+    int a = 3;
+    int a {4}; 
 }

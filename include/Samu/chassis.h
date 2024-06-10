@@ -2,15 +2,29 @@
 #define CHASSIS_H
 
 #include "vex.h"
-#include "Samu/functions.h"
+
+enum ManueverType {
+    DRIVE,
+    TURN,
+    SWING,
+    ARC
+};
+
 class Robot {
 
 private:
-    MotorFunction &leftBack, &leftFront, &rigthFront, &rigthBack;
-    vex::inertial &imu;
+    
+    vex::inertial imu;
+    vex::motor leftBack, leftFront, rightfront, rightback;
 
 public:
-    Robot(MotorFunction &leftBack, MotorFunction &leftFront, MotorFunction &rigthFront, MotorFunction &rigthBack, vex::inertial &inertialSensor) : rigthFront(rigthFront), rigthBack(rigthBack), leftBack(leftBack), leftFront(leftFront), imu(inertialSensor){};
+    
+    Robot(const vex::motor& leftBack, const vex::motor& leftFront, const vex::motor& rightfront, const vex::motor& rightback, const vex::inertial& imu) : rightback(rightback), leftFront(leftFront), rightfront(rightfront), leftBack(leftBack){};
+    
+    void Manuver(ManueverType manuvertype, float target, float speed, float timeout); 
+
+    void Travel(); 
+
 
 };
 
