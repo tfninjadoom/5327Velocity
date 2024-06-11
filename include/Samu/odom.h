@@ -14,12 +14,12 @@ private:
     vex::rotation horizontal, leftVertical, rightVertical; 
     double horizontalOffset {0};
     double leftVerticalOffset {0};
-    double rv {0};
+    double rightVerticalOffset {0};
 
 public:
 
-    Odom(const vex::rotation& horizontal, const vex::rotation& leftVertical, const vex::rotation& rightVertical, const double& horizontalOffset, const double& leftVerticalOffset, const double& rv) : 
-         horizontal(horizontal), rv(rv), leftVertical(leftVertical), rightVertical(rightVertical), horizontalOffset(horizontalOffset), leftVerticalOffset(leftVerticalOffset){};
+    Odom(const vex::rotation& horizontal, const vex::rotation& leftVertical, const vex::rotation& rightVertical, const double& horizontalOffset, const double& leftVerticalOffset, const double& rightVerticalOffset) : 
+         horizontal(horizontal), rightVerticalOffset(rightVerticalOffset), leftVertical(leftVertical), rightVertical(rightVertical), horizontalOffset(horizontalOffset), leftVerticalOffset(leftVerticalOffset){};
 
     void update();
     void setPosition();
