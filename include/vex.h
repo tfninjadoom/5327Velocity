@@ -9,8 +9,9 @@
 #include "v5.h"
 #include "v5_vcs.h"
 
-#include "Samu/chassis.h"
-
+#include "vex.h"
+#include "Samu/pid.h"
+#include "Samu/odom.h"
 
 
 #define waitUntil(condition)                                                   \
