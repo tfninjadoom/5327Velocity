@@ -69,6 +69,7 @@ public:
      */
     static double clamp(double deg) {
         deg -= 360. * std::floor(deg * (1. / 360.));
+        return deg;
     }
 
 }
