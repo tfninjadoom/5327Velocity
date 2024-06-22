@@ -9,7 +9,7 @@
 #include <cmath>
 
 /**
- * @brief Angle class that wraps a double to be in range [0, 360) degrees.
+ * @brief Wraps a `double` to be in range [0, 360) degrees.
  * 
  */
 class Angle {
@@ -19,14 +19,14 @@ private:
 
 public:
     /**
-     * @brief Construct a new Angle object at 0.0 degrees.
+     * @brief Construct a new `Angle` object at 0.0 degrees.
      * 
      */
     Angle() : value{0.} 
     {}
 
     /**
-     * @brief Construct a new Angle object.
+     * @brief Construct a new `Angle` object.
      * 
      * @param degrees 
      */
@@ -35,7 +35,7 @@ public:
     }
 
     /**
-     * @brief Overloads `operator=` to allow double assignment. Converts to be within range [0, 360).
+     * @brief Overloads `operator=` to allow `double` assignment. Converts to be within range [0, 360).
      * 
      * @param degrees 
      * @return Angle& 
@@ -91,7 +91,7 @@ double operator=(double var, const Angle& angle) {
  * @brief Allows for conversion from type `Angle` to type `float`.
  * 
  * @param var  Variable of type `float` being assigned to.
- * @param angle  Angle object being assigned.
+ * @param angle  `Angle` object being assigned.
  * @return float 
  */
 float operator=(float var, const Angle& angle) {
@@ -103,7 +103,7 @@ float operator=(float var, const Angle& angle) {
 /*--------- Literal for clamping objects ----------*/
 
 /**
- * @brief Literal to keep angle within range [0,360).
+ * @brief Literal keeps angle within range [0,360).
  * 
  * @param angle 
  * @return double 
