@@ -1,7 +1,9 @@
+# 5327B-OU  
+
 ## Git commands
-The following cheatsheet on using git to interact with your codebase requires:  
+The following tutorial on using git to interact with your codebase requires:  
 - Git to be installed on your laptop  
-- A separate folder within your desktop to host any and all of your GitHub-linked projects  
+- A separate folder within your desktop to host any of your GitHub-linked projects  
 
 Make sure all git commands are entered in the `bash` terminal within VS Code.  
 
@@ -32,6 +34,7 @@ Then, use `git clone <repo_link>` to create a local clone of the repo to work on
 - GitHub Repositories  
 - Remote Repositories  
 - Live Share  
+- Makefile Tools
 - Doxygen Documentation Generator  
 - GitHub Pull Requests and Issues  
 

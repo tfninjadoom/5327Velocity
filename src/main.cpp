@@ -1,54 +1,589 @@
-/*----------------------------------------------------------------------------*/
-/*                                                                            */
-/*    Module:       main.cpp                                                  */
-/*    Author:       Sammy                                                     */
-/*    Created:      6/8/2024, 3:02:41 PM                                      */
-/*    Description:  V5 project                                                */
-/*                                                                            */
-/*----------------------------------------------------------------------------*/
-#include "vex.h"
-#include "Samu/chassis.h"
-using namespace vex;
-
-// A global instance of vex::brain used for printing to the V5 brain screen
-vex::brain       Brain;
-
-// MOTORS
-motor leftFront(0);
-motor leftBack(0);
-motor rightFront(0);
-motor rightBack(0);
-inertial imu(0);
-
-// PID
-
-PID drive(1,1,1,1);
-PID heading(1,1,1,1);
-PID turn(1,1,1,1);
-PID swing(1,1,1,1);
-PID arc(1,1,1,1);
-
-// ODOM
-rotation horizontal(0);
-rotation leftVertical(0);
-rotation rightVertical(0);
-
-Odom odom(horizontal, leftVertical, rightVertical, 0, 0, 0);
-
-// ROBOT
-Robot robot(leftBack, leftFront, rightFront, rightBack, imu, drive, heading, turn, swing, arc, odom);
+/**
+ * @file main.cpp
+ * @date 2023-10-11
+ * 
+ * @brief 
+ * This is the main file of our program, with the initialize(), autonomous(),
+ * disabled(), and opcontrol() functions.
+ */
+#include "master.h"
+using namespace Controller;
+// autonumous sections: 
 
 
-int main() {
+const int DRIVE_SPEED = 100;
+int INTAKE_DURATION{5000}; // duration of intake before stopping
+int INTAKE_SPEED{150}; // for the speed of the intake
 
-    Brain.Screen.printAt( 10, 50, "Hello V5" );
-   
-    while(1) {
-        
-        // Allow other tasks to run
-        this_thread::sleep_for(10);
+
+void moveForward(double inches,int speed, bool wait=true, int time=500) {
+	chassis.set_drive_pid(inches, speed);
+  
+	if (wait) { chassis.wait_drive(); }
+	else { pros::delay(time); }
+
+}
+	
+
+void moveBackward(double inches, int speed, bool wait=true, int time=500) {
+	chassis.set_drive_pid(-inches, speed);
+  
+	if (wait) { chassis.wait_drive(); }
+
+	else{
+	pros::delay(time);
+}
+}
+
+// the move parameter is if moveing forward would help grab the ball for example if the ball if against a barrier, the same for realeing the ball
+void grabBall(int speed, int duration, bool move, int dis) {
+  intake.move(speed);
+  intake2.move(-speed);
+  if(move){
+    moveForward(dis,DRIVE_SPEED, true);
+  }
+  pros::delay(duration);
+  intake.move(0);
+  intake2.move(0);
+}
+
+void releaseBall(int speed, int duration,bool move, int dis) {
+	intake.move(-speed);
+	if(move){
+		moveForward(dis,DRIVE_SPEED, true);
+	}
+	pros::delay(duration);
+	intake.move(0);
+}
+
+void intakeOn(int speed){
+	intake.move(-speed);
+}	
+
+void outtakeOn(int speed){
+	intake.move(speed);
+}
+
+void intakeOff(){
+	intake.move(0);
+}
+
+void outtakeOff(){
+	intakeOff();
+}
+
+
+void turn(int speed, int degrees, bool right, bool wait=true, int delay=300) {
+  
+  if(right){
+  	chassis.set_turn_pid(degrees, speed);
+  }
+  else{
+	chassis.set_turn_pid(-degrees, speed);
+  }
+
+  if (wait) { chassis.wait_drive();
+   }
+else{
+	pros::delay(delay);
+
+   }
+}
+
+void swing(int speed, int degrees, bool left, bool wait=true) {
+  
+  if(left){
+  	chassis.set_swing_pid(ez::RIGHT_SWING, degrees, speed);
+  }
+  else{
+	chassis.set_swing_pid(ez::LEFT_SWING, degrees, speed);
+  }
+
+  if (wait) { chassis.wait_drive(); };
+}
+
+
+// ---------------------- OLD AUTONS -------------------//
+
+void fiveBallAuton(){
+	// grab triball under elevation bar
+	intakeOn(100);
+	moveForward(5, 100, false, 200);
+	//pros::delay(100);
+	intakeOff();
+
+	// move to goal
+	moveBackward(45, 100);
+	turn(100, 180, true);
+	swing(100, 135, true);
+	Wing::both(true);
+	moveForward(18, 127);
+	swing(100, 90, true);
+	
+	// push
+	outtakeOn(127);
+	moveForward(25, 127, false);
+	//pros::delay(500);
+	moveBackward(15, 100, false);
+	//pros::delay(500);
+	moveForward(20, 127, false);
+	//pros::delay(500);
+	intakeOff();
+	pros::delay(100);
+
+	// turn toward middle ball 1
+	moveBackward(15, 100);
+	Wing::both(false);
+	chassis.set_angle(90);
+	turn(100, 19, true);
+	
+	// move toward middle ball 1
+	moveForward(75, 100);
+	//pros::delay(100);
+	intakeOn(100);
+	moveForward(5, 100, false );
+	//pros::delay(500);
+	intakeOff();
+	
+	// clockwise swing scoop to score 3 triballs
+	moveBackward(10, 100);
+	Wing::both(true);
+	swing(100, 180, false);
+	outtakeOn(100);
+	moveForward(100, 127, false);
+	//pros::delay(500);
+	moveBackward(100, 10);
+}
+void awp_far(){
+	moveBackward(35, 100);
+	turn(100, 80, true);
+	Wing::both(true);
+	moveBackward(20, 127);
+	Wing::both(false);
+	moveForward(20, 100);
+	turn(100, 80, false);
+	Wing::extendElevation(true);
+	moveForward(40, 100);
+}
+
+void unused_fiveBallAuton(){
+  intakeOn(127);
+  moveForward(7,100);
+  //pros::delay(200);
+  intakeOff();
+  moveBackward(35, 100);
+  turn(100, 180, true);
+  //Wing::both(true);
+  moveForward(30, 100);
+  turn(100, 155, true);
+  outtakeOn(INTAKE_SPEED);
+  moveForward(20, 100);
+  turn(100, 10, true);
+  moveForward(40, 120);
+  moveBackward(20, 100);
+  turn(100, 60, false);
+
+  //Wing::both(false);
+  moveForward(40, 75);
+  turn(100, 60, true);
+  intakeOn(100);
+  moveForward(30, 100);
+  intakeOff();
+  
+  moveBackward(10, 75);
+}
+
+void fiveballautonv2(){
+	intakeOn(100);
+	moveForward(5, 100, false, 200);
+	//pros::delay(100);
+	intakeOff();
+
+	// move to goal
+	moveBackward(55, 100);
+	turn(100, 180, true);
+	swing(100, 135, true);
+	Wing::both(true);
+	moveForward(18, 127);
+	swing(100, 90, true);
+	
+	// push
+	outtakeOn(127);
+	moveForward(25, 127, false);
+	//pros::delay(500);
+	//moveBackward(15, 100, false);
+	//pros::delay(500);
+	//turn(100, 180, true);
+
+	moveBackward(20, 127, false);
+	moveForward(20, 100);
+	//turn(100, 180, true);
+	//pros::delay(500);
+	intakeOff();
+	pros::delay(100);
+
+	// turn toward middle ball 1
+	moveBackward(15, 100);
+	Wing::both(false);
+	chassis.set_angle(90);
+	turn(100, 19, true);
+	
+	// move toward middle ball 1
+	moveForward(75, 100);
+	//pros::delay(100);
+	intakeOn(100);
+	moveForward(5, 100, false );
+	//pros::delay(500);
+	intakeOff();
+	
+	// clockwise swing scoop to score 3 triballs
+	moveBackward(10, 100);
+	Wing::both(true);
+	swing(100, 180, false);
+	outtakeOn(100);
+	moveForward(100, 127, false);
+	//pros::delay(500);
+	moveBackward(100, 10);
+}
+
+
+// ----------------------- AUTONS -------------------------//
+
+void slapper_only_skills(){
+	Slapper::run(true);
+}
+
+void prog_skills(){
+	// Use LemLib branch
+}
+
+
+void close_awp() {
+	// Descore match load zone
+	//moveForward(2, 50, true);
+	Wing::left(true);
+	pros::delay(400);
+	turn(60, 60, false);
+	Wing::left(false);
+	moveBackward(14, 100, true);
+	turn(70, 90, false);
+	// Move through alley
+	Wing::right(true);
+	moveBackward(5, 70, false, 500);
+	Wing::right(false);
+	moveBackward(25, -80, true);
+	// Touch pole
+	Wing::right(true);
+	turn(15, -80, true);
+}
+
+void close_disrupt() {
+
+	moveBackward(43, 120, false, 1000);
+	
+	turn(100, 45, true, false);
+	//pros::delay(300);
+	Wing::right(true);
+	turn(100, 80, true, false);
+	outtakeOn(100);
+	moveBackward(20, 100);
+	outtakeOff();
+	turn(100, 360, true);
+}
+
+void far_push() {
+	// Bring preload to goal
+	turn(100, 45, true, true);
+	moveForward(31, 80, true, 500);
+	turn(100, 0, true, true);
+	// Score preload
+	outtakeOn(127);
+	moveForward(12, 100, false, 500);
+	moveBackward(14, 125, false, 500);
+	turn(100, 180, false);
+	//Wing::right(true);
+	moveBackward(23, 120, true);
+	moveForward(8, 90, true);
+	outtakeOff();
+	Wing::right(false);
+}
+
+void far_awp() {
+	// Push preload into goal
+	far_push();
+	// Turn and touch pole
+	turn(100, -90, true);
+	moveForward(46, 110, true);
+	turn(100, 90, true, true);
+	moveBackward(6, 70);
+	Wing::right(true);
+	//turn(70, 115, true, true);
+	
+}
+
+/**
+ * A (boilerplate) callback function for LLEMU's center button.
+ *
+void on_center_button() {
+	if (pressed) {
+		pros::lcd::set_text(2, "I was pressed!");
+	}
+} //*/
+
+/**
+ * Set up ALL sensors and tasks in this function.
+ * Runs as soon as program is started.
+ * 
+ * @details 
+ * Use this for any and all setup/startup code that is global to autonomous 
+ * and driver control. All other competition modes are blocked by initialize, 
+ * so keep execution time for this mode under a few seconds.
+ */
+
+
+void initialize() {
+	// displays stuff on the brain screen
+	pros::lcd::initialize();
+        pros::lcd::set_text(1, "StickCurve::strong");
+        pros::lcd::set_text(2, "DriveMode::arcade");
+        // pros::lcd::register_btn1_cb(on_center_button);
+
+	pros::delay(500); // Stop the user from doing anything while legacy ports configure
+
+	//--------Piston Starting States---------//
+	Wing::both(false);
+    Wing::extendElevation(false);
+
+	//--------Chassis Configuration---------//
+	//chassis.set_active_brake(0.1); 	// Sets active brake kP, recommended value 0.1.
+			// 
+
+	//moved here from autonomous()
+	chassis.reset_pid_targets();				// Resets PID targets to 0.
+	chassis.reset_gyro();						// Resets gyro position to 0.
+	chassis.reset_drive_sensor();				// Resets drive sensors to 0.
+	default_constants();			// 
+	exit_condition_defaults();
+	chassis.initialize(); 
+}
+
+/**
+ * Runs while robot is disabled before/during a competition match.
+ * 
+ * @details 
+ * Runs while the robot is in the disabled state of Field Management System or 
+ * the VEX Competition Switch, following either autonomous or opcontrol. When 
+ * the robot is enabled, this task will exit.
+ */
+void disabled() {
+	//------------Pistons------------//
+}
+
+/**
+ * Match-specific initialization routines.
+ * Runs while robot is disabled at the beginning of a competition match.
+ * 
+ * @details 
+ * Runs after initialize(), and before autonomous when connected to the Field 
+ * Management System or the VEX Competition Switch. This is intended for 
+ * competition-specific initialization routines, such as an autonomous 
+ * selector on the LCD. Followed by autonomous() or opcontrol().
+ */
+void competition_initialize() {}
+
+/**
+ * Sets up, then runs selected autonomous function.
+ * Called at the start of the autonomous mode.
+ * 
+ * @details 
+ * This function will be started in its own task with the default priority and 
+ * stack size whenever the robot is enabled via the Field Management System or 
+ * the VEX Competition Switch in the autonomous mode. Alternatively, this 
+ * function may be called in initialize or opcontrol for non-competition 
+ * testing purposes.
+ */
+void autonomous() {
+	
+	//Autonomous::selection=Autonomous::Select::left;
+	Wing::both(false);
+    Wing::extendElevation(false);
+	
+	//Reinitialization
+	//imu.reset();
+	chassis.set_drive_brake(MOTOR_BRAKE_COAST);	// Set motors to hold. This helps autonomous consistency.
+	//initialize();
+	
+	/*if 
+	(Autonomous::selection==Autonomous::Select::left) 
+	{ Autonomous::left(); } 
+	else if 
+	(Autonomous::selection==Autonomous::Select::right) 
+	{ Autonomous::right(); } 
+	else 
+	{ Autonomous::skills(); }
+	*/
+
+// Robot 2
+	close_awp();
+	//far_awp();
+	
+	//close_disrupt();
+	//slapper_only_skills();
+}
+
+
+//-----------DRIVER CONTROL------------//
+/**
+ * (Robot is driven by a human.) 
+ * Run the robot based on controller and joystick inputs.
+ * 
+ * @details 
+ * This function will be started in its own task with the default priority and 
+ * stack size.
+ */
+void opcontrol() {
+
+	DriveMode driveMode { DriveMode::arcade };
+
+	StickCurve stickCurve { StickCurve::weak };
+	StickCurve defaultStickCurve { stickCurve };
+
+    int intakeMode { 0 };
+
+    Wing::both(false);
+    Wing::extendElevation(false);
+
+	//--------Chassis Reconfiguration---------//
+	chassis.set_drive_brake(MOTOR_BRAKE_COAST);
+
+	while (true) {
+		// pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
+		//                 				(pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
+		//                 				(pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
+
+        // Drive Modes
+		switch (driveMode) {
+			case (DriveMode::tank):
+				Drive1::tankDrive(stickCurve);
+            	pros::lcd::set_text(2, "DriveMode::tank"); 
+				break;
+			case (DriveMode::arcade):
+				Drive1::arcadeDrive(stickCurve);
+            	pros::lcd::set_text(2, "DriveModepros ::arcade"); 
+				break;
+			case (DriveMode::singleStick):
+				Drive1::singleStickDrive(stickCurve);
+            	pros::lcd::set_text(2, "DriveMode::singleStick");
+				break;
+		}
+
+        // Intake
+        if ( newPress(L1) ) {
+			if (intakeMode != 1) {
+				intake.move(110);
+                intake2.move(-110);
+				intakeMode = 1;
+			} else {
+				intake.move(0);
+                intake2.move(0);
+				intakeMode = 0;
+			}
+		}
+		// Outtake
+		if ( newPress(R1) ) {
+			if (intakeMode != -1) {
+				intake.move(-110);
+                intake2.move(110);
+				intakeMode = -1;
+			} else {
+				intake.move(0);
+                intake2.move(0);
+				intakeMode = 0;
+			}
+		}
+
+		if ( newPress(Y)) {
+			if (!(Slapper::running)) {
+				Slapper::run(true);
+			} else {
+				Slapper::run(false);
+			}
+		}
+
+		// Slapper
+		if ( newPress(Y) ) {
+			if (intakeMode != -1) {
+				intake.move(-110);
+                intake2.move(110);
+				intakeMode = -1;
+			} else {
+				intake.move(0);
+                intake2.move(0);
+				intakeMode = 0;
+			}
+		}
+
+
+        // Left Wing
+        if ( newPress(L2) ) {
+			if (!(Wing::leftExtended)) {
+				Wing::left(true);
+			} else {
+				Wing::left(false);
+			}
+		}
+
+		// Right Wing
+		if ( newPress(R2) ) {
+			if (!(Wing::rightExtended)) {
+				Wing::right(true);
+			} else {
+				Wing::right(false);
+			}
+		}
+
+		// Both Wings
+		if ( newPressShift(L2, R2) ) {
+			if (!(Wing::leftExtended && Wing::rightExtended)) {
+				Wing::both(true);
+			} else {
+				Wing::both(false);
+			}
+		}
+
+		// Elevation Wing
+		if ( newPress(RIGHT) ) {
+			if (!(Wing::elevated)) {
+				Wing::extendElevation(true);
+			} else {
+				Wing::extendElevation(false);
+			}
+		}
+
+
+		// autonomous
+		if ( newPress(DOWN) ) {
+			autonomous();
+		}
+
+
+        // slow drive
+        if ( newPress(B) ) {
+            if ( stickCurve != StickCurve::slow ) {
+                stickCurve = StickCurve::slow;
+                pros::lcd::set_text(1, "StickCurve::slow");
+            } else if ( stickCurve == StickCurve::slow ) {
+                // change stick curve back to default
+				if ( defaultStickCurve == StickCurve::weak) {
+					stickCurve = StickCurve::weak;
+                	pros::lcd::set_text(1, "StickCurve::weak");
+				} else if ( defaultStickCurve == StickCurve::strong) {
+					stickCurve = StickCurve::strong;
+                	pros::lcd::set_text(1, "StickCurve::strong");
+				}
+            }
+        }
+
+        pros::delay(20);
     }
-
-    // int a = 3;
-    // int a {4}; 
 }
