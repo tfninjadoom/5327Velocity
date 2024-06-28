@@ -44,7 +44,7 @@ public:
         value = clamp(degrees);
         return *this;
     }
-
+ 
     /**
      * @brief Returns angle value within range [0, 360).
      * 
@@ -70,6 +70,20 @@ public:
     static double clamp(double deg) {
         deg -= 360. * std::floor(deg * (1. / 360.));
         return deg;
+    }
+
+    /**
+     * @brief COMMENTS PENDING
+     * 
+     */
+    static bool withinRange(const Angle& angle, double low, double high) {
+        low = clamp(low);
+        high = clamp(high);
+        if ( (low <= angle.get()) && (angle.get() <= high) )            { return true; } 
+        else if ( high <= low ) {
+            if      ( (0.  <= angle.get()) && (angle.get() <= high) )   { return true; }
+            else if ( (low <= angle.get()) && (angle.get() <  360.) )   { return true; }
+        } else                                                          { return false; }
     }
 
 }
