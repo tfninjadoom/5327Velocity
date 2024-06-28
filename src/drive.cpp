@@ -34,30 +34,32 @@ namespace Drive1 {
 		return val;
 	}
 
+	void xDrive(StickCurve stickCurve) {
+		int leftX = controller.get_analog(ANALOG_LEFT_X);
+		int leftY = controller.get_analog(ANALOG_LEFT_Y);
+		int rightX = controller.get_analog(ANALOG_RIGHT_X);
+
+		leftFront.move(leftY + leftX + rightX);
+		leftBack.move(leftY - leftX + rightX);
+
+		rightFront.move(-leftY + leftX + rightX);
+		rightBack.move(-leftY - leftX + rightX);
+	}
+
+	void xFieldCentricDrive(StickCurve stickCurve) {
+		return; // implementation pending
+	}
 
 	void motorInputs(int leftInput, int rightInput ) {
 		
 		leftFront.move(leftInput);
 		leftBack.move(leftInput);
-		leftMid.move(leftInput);
 
 		rightFront.move(rightInput);
 		rightBack.move(rightInput);
-		rightMid.move(rightInput);
 
 	}
-	float clamp(float value, float high, float low){
-		if(value > high){
-			value = high;
-		
-		} else if(value < low){
-			value = low;
-		}
-		else{
-			value = value;
-		}
-		return value;
-	}
+
 	void arcadeDrive(StickCurve stickCurve) {
 		int forward_raw = controller.get_analog(ANALOG_LEFT_Y);
 		float angular_raw = controller.get_analog(ANALOG_RIGHT_X);

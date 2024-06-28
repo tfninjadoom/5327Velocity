@@ -51,6 +51,7 @@
 #include "drive.hpp"
 #include "controller.hpp"
 #include "autons.hpp"
+#include "angle.hpp"
 #include "EZ-Template/api.hpp"
 #include "autons/chassis.hpp"
 #include "PID_1/PID_1.hpp"
@@ -71,13 +72,6 @@ void competition_initialize(void);
 void opcontrol(void);
 #ifdef __cplusplus
 }
-#endif
-
-#ifdef __cplusplus
-/**
- * You can add C++-only headers here
- */
-//#include <iostream>
 #endif
 
 #endif  // _PROS_MAIN_H_
